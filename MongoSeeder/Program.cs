@@ -1,12 +1,165 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
+using System;
+using System.Xml;
 
 namespace MongoSeeder
 {
+    class Mercury
+    {
+        public ObjectId Id { get; set; }
+        public DateTime? DateTimeStart { get; set; }
+        public double Hg { get; set; }
+        public string Unit { get; set; }
+
+        override public string ToString()
+        {
+            return $"DateTimeStart: {DateTimeStart}, Hg: {Hg}, Unit: {Unit}";
+        }
+    }
+
+    class Meteorologi
+    {
+        public ObjectId Id { get; set; }
+        public DateTime? StartDateTime { get; set; }
+        public double WindDirection { get; set; }
+        public double WindSpeed { get; set; }
+        public double Temperature { get; set; }
+        public double Humidity { get; set; }
+        public double Radiation { get; set; }
+        public double Pressure { get; set; }
+    }
+
+
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            SeedMeteorologi();
+        }
+
+        static void SeedMercury()
+        {
+            MongoClient client = new MongoClient("mongodb://localhost:27017");
+            IMongoDatabase db = client.GetDatabase("Meteorologi");
+            IMongoCollection<Mercury> mercuryCollection = db.GetCollection<Mercury>("mercury");
+
+            var counter = 0;
+
+            Mercury mercury = new Mercury();
+
+            /// READ XML
+            XmlReader xmlReader = XmlReader.Create(@"C:\Users\marti\Desktop\School\AirData\Data\Mercury.xml");
+            while (xmlReader.Read())
+            {
+                // Read node
+                if ((xmlReader.NodeType == XmlNodeType.Element))
+                {
+
+                    if (mercury.DateTimeStart != null && mercury.Hg != 0 && !String.IsNullOrEmpty(mercury.Unit))
+                    {
+                        mercuryCollection.InsertOne(mercury);
+                        mercury = new Mercury();
+                        //Console.WriteLine("new created");
+                    }
+
+                    if (xmlReader.Name.Equals("DateTimeStart"))
+                    {
+                        mercury.DateTimeStart = DateTime.Parse(xmlReader.ReadElementContentAsString());
+                        //Console.WriteLine("DateTimeStart read");
+                    }
+
+                    if (xmlReader.Name.Equals("Hg"))
+                    {
+                        mercury.Hg = double.Parse(xmlReader.ReadElementContentAsString());
+                        //Console.WriteLine("Hg read");
+                    }
+
+                    if (xmlReader.Name.Equals("unit"))
+                    {
+                        mercury.Unit = xmlReader.ReadElementContentAsString();
+                        //Console.WriteLine("unit read");
+                    }
+                    //Console.WriteLine(mercury);
+
+
+                    // Insert into DB
+                    Console.WriteLine("So far: " + counter++);
+                }
+            }
+            mercuryCollection.InsertOne(mercury);
+            Console.WriteLine("Done");
+            Console.ReadKey();
+        }
+
+        static void SeedMeteorologi()
+        {
+            MongoClient client = new MongoClient("mongodb://localhost:27017");
+            IMongoDatabase db = client.GetDatabase("Meteorologi");
+            IMongoCollection<Meteorologi> meteorologiCollection = db.GetCollection<Meteorologi>("meteorologi");
+
+            var counter = 0;
+
+            Meteorologi meteorologi = new Meteorologi();
+
+            /// READ XML
+            XmlReader xmlReader = XmlReader.Create(@"C:\Users\marti\Desktop\School\AirData\Data\Meteorologi.xml");
+            while (xmlReader.Read())
+            {
+                // Read node
+                if ((xmlReader.NodeType == XmlNodeType.Element))
+                {
+
+                    if (meteorologi.StartDateTime != null &&
+                        meteorologi.WindDirection != 0 &&
+                        meteorologi.WindSpeed != 0 &&
+                        meteorologi.Temperature != 0 &&
+                        meteorologi.Humidity != 0 &&
+                        meteorologi.Radiation != 0 &&
+                        meteorologi.Pressure != 0
+                        )
+                    {
+                        meteorologiCollection.InsertOne(meteorologi);
+                        meteorologi = new Meteorologi();
+                    }
+
+                    if (xmlReader.Name.Equals("StartDateTime"))
+                    {
+                        meteorologi.StartDateTime = DateTime.Parse(xmlReader.ReadElementContentAsString());
+                    }
+
+                    if (xmlReader.Name.Equals("WindDirection"))
+                    {
+                        meteorologi.WindDirection = double.Parse(xmlReader.ReadElementContentAsString());
+                    }
+
+                    if (xmlReader.Name.Equals("WindSpeed"))
+                    {
+                        meteorologi.WindSpeed = double.Parse(xmlReader.ReadElementContentAsString());
+                    }
+                    if (xmlReader.Name.Equals("Temperature"))
+                    {
+                        meteorologi.Temperature = double.Parse(xmlReader.ReadElementContentAsString());
+                    }
+                    if (xmlReader.Name.Equals("Humidity"))
+                    {
+                        meteorologi.Humidity = double.Parse(xmlReader.ReadElementContentAsString());
+                    }
+                    if (xmlReader.Name.Equals("Radiation"))
+                    {
+                        meteorologi.Radiation = double.Parse(xmlReader.ReadElementContentAsString());
+                    }
+                    if (xmlReader.Name.Equals("Pressure"))
+                    {
+                        meteorologi.Pressure = double.Parse(xmlReader.ReadElementContentAsString());
+                    }
+
+                    Console.WriteLine("So far: " + counter++);
+                }
+            }
+            meteorologiCollection.InsertOne(meteorologi);
+            Console.WriteLine("Done");
+            Console.ReadKey();
         }
     }
 }
