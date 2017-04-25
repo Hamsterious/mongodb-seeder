@@ -10,7 +10,7 @@ namespace MongoSeeder
     {
         static void Main(string[] args)
         {
-            SeedOzone();
+            SeedStationTemperature();
         }
 
         static void SeedMercury()
@@ -191,72 +191,110 @@ namespace MongoSeeder
             Console.ReadKey();
         }
 
-        static void SeedMeteorologi()
+        static void SeedPrecipitation()
         {
             MongoClient client = new MongoClient("mongodb://localhost:27017");
             IMongoDatabase db = client.GetDatabase("Meteorologi");
-            IMongoCollection<Meteorologi> meteorologiCollection = db.GetCollection<Meteorologi>("meteorologi");
+            IMongoCollection<Precipitation> precipitationCollection = db.GetCollection<Precipitation>("precipitation");
 
             var counter = 0;
 
-            Meteorologi meteorologi = new Meteorologi();
+            Precipitation precipitation = new Precipitation();
 
             /// READ XML
-            XmlReader xmlReader = XmlReader.Create(@"C:\Users\marti\Desktop\School\AirData\Data\Meteorologi.xml");
+            XmlReader xmlReader = XmlReader.Create(@"C:\Users\marti\Desktop\School\AirData\Data\precipitation.xml");
             while (xmlReader.Read())
             {
                 // Read node
                 if ((xmlReader.NodeType == XmlNodeType.Element))
                 {
 
-                    if (meteorologi.StartDateTime != null &&
-                        meteorologi.WindDirection != 0 &&
-                        meteorologi.WindSpeed != 0 &&
-                        meteorologi.Temperature != 0 &&
-                        meteorologi.Humidity != 0 &&
-                        meteorologi.Radiation != 0 &&
-                        meteorologi.Pressure != 0
-                        )
+                    if (precipitation.DateTimeStart != null && precipitation.Prep_Hour != null && precipitation.Prep_Tot != null)
                     {
-                        meteorologiCollection.InsertOne(meteorologi);
-                        meteorologi = new Meteorologi();
+                        precipitationCollection.InsertOne(precipitation);
+                        precipitation = new Precipitation();
+                        //Console.WriteLine("new created");
                     }
 
-                    if (xmlReader.Name.Equals("StartDateTime"))
+                    if (xmlReader.Name.Equals("DateTimeStart"))
                     {
-                        meteorologi.StartDateTime = DateTime.Parse(xmlReader.ReadElementContentAsString());
+                        precipitation.DateTimeStart = DateTime.Parse(xmlReader.ReadElementContentAsString());
+                        //Console.WriteLine("DateTimeStart read");
                     }
 
-                    if (xmlReader.Name.Equals("WindDirection"))
+                    if (xmlReader.Name.Equals("Prep_Hour"))
                     {
-                        meteorologi.WindDirection = double.Parse(xmlReader.ReadElementContentAsString());
+                        precipitation.Prep_Hour = double.Parse(xmlReader.ReadElementContentAsString());
+                        //Console.WriteLine("Hg read");
                     }
 
-                    if (xmlReader.Name.Equals("WindSpeed"))
+                    if (xmlReader.Name.Equals("Prep_Tot"))
                     {
-                        meteorologi.WindSpeed = double.Parse(xmlReader.ReadElementContentAsString());
+                        precipitation.Prep_Tot = double.Parse(xmlReader.ReadElementContentAsString());
+                        //Console.WriteLine("unit read");
                     }
-                    if (xmlReader.Name.Equals("Temperature"))
-                    {
-                        meteorologi.Temperature = double.Parse(xmlReader.ReadElementContentAsString());
-                    }
-                    if (xmlReader.Name.Equals("Humidity"))
-                    {
-                        meteorologi.Humidity = double.Parse(xmlReader.ReadElementContentAsString());
-                    }
-                    if (xmlReader.Name.Equals("Radiation"))
-                    {
-                        meteorologi.Radiation = double.Parse(xmlReader.ReadElementContentAsString());
-                    }
-                    if (xmlReader.Name.Equals("Pressure"))
-                    {
-                        meteorologi.Pressure = double.Parse(xmlReader.ReadElementContentAsString());
-                    }
+                    //Console.WriteLine(ozone);
 
+
+                    // Insert into DB
                     Console.WriteLine("So far: " + counter++);
                 }
             }
-            meteorologiCollection.InsertOne(meteorologi);
+            precipitationCollection.InsertOne(precipitation);
+            Console.WriteLine("Done");
+            Console.ReadKey();
+        }
+
+        static void SeedStationTemperature()
+        {
+            MongoClient client = new MongoClient("mongodb://localhost:27017");
+            IMongoDatabase db = client.GetDatabase("Meteorologi");
+            IMongoCollection<StationTemperature> stationTemperatureCollection = db.GetCollection<StationTemperature>("precipitation");
+
+            var counter = 0;
+
+            StationTemperature precipitation = new StationTemperature();
+
+            /// READ XML
+            XmlReader xmlReader = XmlReader.Create(@"C:\Users\marti\Desktop\School\AirData\Data\StationTemperature.xml");
+            while (xmlReader.Read())
+            {
+                // Read node
+                if ((xmlReader.NodeType == XmlNodeType.Element))
+                {
+
+                    if (precipitation.DateTimeStart != null && precipitation.T != null && precipitation.RH != null)
+                    {
+                        stationTemperatureCollection.InsertOne(precipitation);
+                        precipitation = new StationTemperature();
+                        //Console.WriteLine("new created");
+                    }
+
+                    if (xmlReader.Name.Equals("DateTimeStart"))
+                    {
+                        precipitation.DateTimeStart = DateTime.Parse(xmlReader.ReadElementContentAsString());
+                        //Console.WriteLine("DateTimeStart read");
+                    }
+
+                    if (xmlReader.Name.Equals("T"))
+                    {
+                        precipitation.T = double.Parse(xmlReader.ReadElementContentAsString());
+                        //Console.WriteLine("Hg read");
+                    }
+
+                    if (xmlReader.Name.Equals("RH"))
+                    {
+                        precipitation.RH = double.Parse(xmlReader.ReadElementContentAsString());
+                        //Console.WriteLine("unit read");
+                    }
+                    //Console.WriteLine(ozone);
+
+
+                    // Insert into DB
+                    Console.WriteLine("So far: " + counter++);
+                }
+            }
+            stationTemperatureCollection.InsertOne(precipitation);
             Console.WriteLine("Done");
             Console.ReadKey();
         }
